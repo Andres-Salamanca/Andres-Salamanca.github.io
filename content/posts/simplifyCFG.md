@@ -2,7 +2,7 @@
 title: "SimplifyCFG, part 1"
 Tags : ["LLVM" , "C++"] 
 date: 2025-02-05T16:07:05-05:00
-draft: true
+draft: false
 hideToc: false
 ---
 
