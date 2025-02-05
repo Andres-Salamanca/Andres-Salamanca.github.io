@@ -12,4 +12,7 @@ I’m **Andrés**, passionate about low-level computing, from **compilers** to h
 
 ---
 
-## Projects
+- GitHub: [GitHub](https://github.com/Andres-Salamanca)
+- LinkedIn: [LinkedIn](https://www.linkedin.com/in/salamanca-andres)
+- Mail: [Mail](mailto://andrealebarbaritos@gmail.com)
+
