@@ -21,6 +21,15 @@ The [SimplifyCFG.h][4] file defines the following class:
 {{< highlight cpp "linenostart=29" >}}
 class SimplifyCFGPass : public PassInfoMixin<SimplifyCFGPass> {
   SimplifyCFGOptions Options;
+  public:
+      /// The default constructor configures the pass 
+      /// to prioritize canonical IR over optimal IR
+      SimplifyCFGPass();
+      /// Construct a pass with optional optimizations.
+      SimplifyCFGPass(const SimplifyCFGOptions &PassOptions);
+ 
+      /// Run the pass over the function.
+      PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 {{< / highlight >}}
 
 The `SimplifyCFGPass` class inherits from `PassInfoMixin<SimplifyCFGPass>`, which is designed for use with the [New Pass Manager][5]. Additionally, the class contains an attribute named `Options`, which allows us to specify the optimizations we want the pass to perform, in addition to the default ones.
@@ -67,7 +76,7 @@ The [dominator tree][1] (`DT`) is initialized as `nullptr`. As previously mentio
 
 We can verify that the `DT` is not initialized using `gdb`.
 
-{{< highlight bash "hl_lines=15-16 ,linenostart=374" >}}
+{{< highlight bash "hl_lines=17-18 ,linenostart=374" >}}
 
 379       if (RequireAndPreserveDomTree)
 (gdb) source commandLineOtionsPrettyPrinter.py ####load pretty printer i made :)####
@@ -83,9 +92,11 @@ Additional vals 0
 Argument name: 0x555556314818 "simplifycfg-require-and-preserve-domtree"
 Type of arg<0x0>
 Help description 0x5555563147b8 "Temporary development switch used to gradually uplift SimplifyCFG into preserving DomTree,"
-(gdb) call RequireAndPreserveDomTree.operator bool() #### call to operator bool() ####
+
+#### call to operator bool() ####
+(gdb) call RequireAndPreserveDomTree.operator bool() 
 $2 = false 
-(gdb) n #### jump line 380 didn't initialize DT ####
+(gdb) n #### jump line 380 DT was not initialized ####
 381       if (!simplifyFunctionCFG(F, TTI, DT, Options))
 
 }
@@ -93,12 +104,12 @@ $2 = false
 
 The `RequireAndPreserveDomTree` flag is implemented as a command-line option of type `bool`, allowing us to inspect its value directly in `gdb`. This can be done by invoking the **bool operator** or by observing that the code skips the associated `if` statement during debugging.
 
-Finally, we are ready to invoke the optimizations. The function `simplifyFunctionCFG(F, TTI, DT, Options)` is called to perform the optimizations. It returns a `bool` indicating whether any changes were made. If no changes were made, the pass will preserve all the analysis results.
+Finally, we are ready to invoke the optimizations. The function `simplifyFunctionCFG(F, TTI, DT, Options)` is called to perform the optimizations. It returns a `bool` indicating whether any changes were made to the IR. If no changes were made, the pass will preserve all the analysis results.
 
 {{< highlight cpp "hl_lines=2 ,linenostart=374" >}}
 
   if (!simplifyFunctionCFG(F, TTI, DT, Options))
-    return PreservedAnalyses::all();
+    return PreservedAnalyses::all(); //Preserve analysis if no changes were made.
 }
 {{< / highlight >}}
 
@@ -175,7 +186,7 @@ The function traverses the CFG, adding the successors of the current basic block
 Apart from flagging reachable blocks, the function also performs checks on each basic block. These checks can modify the CFG by marking certain blocks as unreachable. Below are two scenarios where the CFG can change:  
 
 1. **Storing to a `null` or an undefined memory location** – This can lead to the block being considered unreachable.  
-2. **An [`llvm.assume`][9] intrinsic evaluates to `false`** – If an assumption is explicitly marked as `false`, the block becomes unreachable. The following example demonstrates this using the C++ `[[assume]]` attribute:  
+2. **An [`llvm.assume`][9] intrinsic evaluates to `false`** – If an assumption is explicitly marked as `false`, the block becomes unreachable. The following example demonstrates this using the C++ [`[[assume]]`][18] attribute:  
 
 
 ### Visualization of How `markAliveBlocks` Works  
@@ -280,6 +291,8 @@ In the next part, we will explore the **tailMergeBlocksWithSimilarFunctionTermin
 | [15] | llvm::SmallPtrSet | [llvm::SmallPtrSet](https://llvm.org/doxygen/classllvm_1_1SmallPtrSet.html) |
 | [16] | BasicBlock | [BasicBlock](https://llvm.org/doxygen/classllvm_1_1BasicBlock.html) |
 | [17] | markAliveBlocks | [markAliveBlocks](https://llvm.org/doxygen/Transforms_2Utils_2Local_8cpp_source.html#l03038) |
+| [18] | assume | [assume](https://llvm.org/doxygen/Transforms_2Utils_2Local_8cpp_source.html#l03038) |
+
 
 [1]: https://en.wikipedia.org/wiki/Dominator_(graph_theory)#Algorithms "Dominator"
 [2]:https://en.wikipedia.org/wiki/Alias_analysis "Alias Analyis"
@@ -298,3 +311,4 @@ In the next part, we will explore the **tailMergeBlocksWithSimilarFunctionTermin
 [15]: https://llvm.org/doxygen/classllvm_1_1SmallPtrSet.html "llvm::SmallPtrSet"
 [16]: https://llvm.org/doxygen/classllvm_1_1BasicBlock.html "BasicBlock"
 [17]: https://llvm.org/doxygen/Transforms_2Utils_2Local_8cpp_source.html#l03038 "markAliveBlocks"
+[18]: https://en.cppreference.com/w/cpp/language/attributes/assume "assume"
