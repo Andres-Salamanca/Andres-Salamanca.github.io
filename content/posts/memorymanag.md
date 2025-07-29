@@ -1,0 +1,19 @@
+---
+title: "C++ Memory Management: Chapter 8 Leak Detector Explained Visually"
+date: 2025-07-29T10:48:00-05:00
+draft: false
+Tags : ["C++", "C"]
+---
+
+
+📚 Lately, I’ve been diving into *C++ Memory Management* by Patrice Roy — a book I highly recommend if you're into systems programming or want to level up your understanding of how C++ handles memory.
+
+One chapter that really stood out to me was **Chapter 8: Writing a Naïve Leak Detector**. It builds on key concepts from earlier chapters, like:
+
+* **Chapter 3**: Casts and `cv`-qualifications
+* **Chapter 7**: Overloading memory allocation operators
+{{< youtube _V8I-NYPxwE >}}
+
+📘 **Book**: [C++ Memory Management – Packt](https://www.packtpub.com/en-us/product/c-memory-management-9781805129806)
+💻 **Source code**: [GitHub – Chapter 8 example](https://github.com/PacktPublishing/C-Plus-Plus-Memory-Management/blob/main/chapter8/leak-detector-correct.cpp)
+
