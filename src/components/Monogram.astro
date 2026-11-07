@@ -1,0 +1,49 @@
+---
+// "AS" monogram in pixel art, shown in the about window until public/portrait.png exists.
+// Each letter is a 7x11 grid ('#' = pixel) on a 24x24 canvas, drawn twice:
+// once in ink offset by one pixel (the hard shadow) and once in amber on top.
+const letters = {
+  A: [
+    '.#####.',
+    '#######',
+    '##...##',
+    '##...##',
+    '##...##',
+    '#######',
+    '#######',
+    '##...##',
+    '##...##',
+    '##...##',
+    '##...##',
+  ],
+  S: [
+    '.######',
+    '#######',
+    '##.....',
+    '##.....',
+    '##.....',
+    '######.',
+    '.######',
+    '.....##',
+    '.....##',
+    '#######',
+    '######.',
+  ],
+};
+const top = 6;
+const placed = [
+  { rows: letters.A, left: 4 },
+  { rows: letters.S, left: 13 },
+];
+const pixels = placed.flatMap(({ rows, left }) =>
+  rows.flatMap((row, y) =>
+    [...row].flatMap((cell, x) => (cell === '#' ? [{ x: left + x, y: top + y }] : [])),
+  ),
+);
+---
+<div class="portrait portrait-art" role="img" aria-label="AS monogram in pixel art">
+  <svg viewBox="0 0 24 24" width="116" height="116" shape-rendering="crispEdges" aria-hidden="true">
+    {pixels.map(({ x, y }) => <rect x={x + 1} y={y + 1} width="1" height="1" fill="#0B1016" />)}
+    {pixels.map(({ x, y }) => <rect x={x} y={y} width="1" height="1" fill="#F2B544" />)}
+  </svg>
+</div>

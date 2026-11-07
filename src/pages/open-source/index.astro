@@ -1,0 +1,105 @@
+---
+import Desktop from '../../layouts/Desktop.astro';
+import { SITE, prUrl } from '../../lib/site';
+import { countPrs, getProjects, getStats } from '../../lib/stats';
+
+const projects = await getProjects();
+const { prs, projects: projectCount, areas } = await getStats();
+---
+<Desktop
+  title={`Open-source pull requests | ${SITE.name}`}
+  description={`${prs} merged pull requests in open-source C++ and compiler projects: ${projects.map((p) => p.data.name).join(', ')}.`}
+  tasks={[{ label: 'open-source' }]}
+>
+  <p class="prompt">andres@salamanca:~$ <span><span class="nowrap">gh pr list</span> <span class="nowrap">--author me</span> <span class="nowrap">--merged</span></span></p>
+
+  <section class="window" aria-labelledby="prs-title">
+    <div class="titlebar">
+      <span>open-source — merged pull requests</span>
+      <a class="title-btn" href="/" aria-label="Close and go home">x</a>
+    </div>
+
+    <div class="oss-body">
+      <h1 id="prs-title">Open-source pull requests</h1>
+
+      <div class="chips">
+        <div class="chip">{prs} <span>merged</span></div>
+        <div class="chip">{projectCount} <span>projects</span></div>
+        <div class="chip">{areas} <span>areas</span></div>
+      </div>
+
+      <div class="filters" role="group" aria-label="Filter pull requests" hidden>
+        <button type="button" data-filter="all" aria-pressed="true">all</button>
+        {projects.map((project) => <button type="button" data-filter={project.id} aria-pressed="false">{project.id}</button>)}
+        <label><input type="checkbox" id="show-nfc" checked />show NFC</label>
+      </div>
+
+      <div class="projects">
+        {projects.map((project) => (
+          <section class="project" data-project={project.id} aria-labelledby={`p-${project.id}`}>
+            <div class="project-head">
+              <h2 id={`p-${project.id}`}><a href={`https://github.com/${project.data.repo}`}>{project.data.name}</a> · {countPrs(project)}</h2>
+              <p>{project.data.description}</p>
+            </div>
+            <div class="areas">
+              {project.data.groups.map((group) => (
+                <div class="area">
+                  <div class="area-head">
+                    <h3>{group.title}</h3>
+                    <span class="shown"><span data-shown>{group.prs.length}</span> of {group.prs.length}</span>
+                    {group.summary && <p>{group.summary}</p>}
+                  </div>
+                  <ul class="pr-list">
+                    {group.prs.map((pr) => (
+                      <li data-nfc={pr.nfc ? '' : undefined}>
+                        <a href={prUrl(project.data.repo, pr.number)}>#{pr.number}</a>
+                        <span class="pr-title">{pr.title}</span>
+                        {pr.nfc && <span class="nfc">NFC</span>}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+            <p class="gh-link"><a href={project.data.query}>All my {project.data.name} PRs on GitHub -&gt;</a></p>
+          </section>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <script is:inline>
+    // Filters are an enhancement: without JS the toolbar stays hidden and every PR shows.
+    (function () {
+      var bar = document.querySelector('.filters');
+      var nfc = document.getElementById('show-nfc');
+      var buttons = bar.querySelectorAll('button');
+      var projects = document.querySelectorAll('.project');
+      var filter = 'all';
+      function apply() {
+        buttons.forEach(function (b) {
+          b.setAttribute('aria-pressed', String(b.dataset.filter === filter));
+        });
+        projects.forEach(function (project) {
+          project.hidden = filter !== 'all' && project.dataset.project !== filter;
+        });
+        document.querySelectorAll('.area').forEach(function (area) {
+          var shown = 0;
+          area.querySelectorAll('li').forEach(function (row) {
+            row.hidden = !nfc.checked && row.hasAttribute('data-nfc');
+            if (!row.hidden) shown++;
+          });
+          area.querySelector('[data-shown]').textContent = shown;
+        });
+      }
+      buttons.forEach(function (b) {
+        b.addEventListener('click', function () {
+          filter = b.dataset.filter;
+          apply();
+        });
+      });
+      nfc.addEventListener('change', apply);
+      bar.hidden = false;
+    })();
+  </script>
+</Desktop>

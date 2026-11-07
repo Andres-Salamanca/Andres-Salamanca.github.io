@@ -1,0 +1,16 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { formatDate, formatTags } from '../lib/site';
+
+interface Props {
+  post: CollectionEntry<'posts'>;
+}
+const { post } = Astro.props;
+const { title, date, description, tags } = post.data;
+---
+<a class="card" href={`/posts/${post.id}/`}>
+  <span class="card-date"><time datetime={date.toISOString()}>{formatDate(date)}</time></span>
+  <span class="card-title">{title}</span>
+  {description && <span class="card-text">{description}</span>}
+  <span class="card-tags">{formatTags(tags)}</span>
+</a>

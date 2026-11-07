@@ -1,0 +1,25 @@
+---
+import { SITE } from '../lib/site';
+
+interface Props {
+  prCount?: number;
+}
+const { prCount } = Astro.props;
+const path = Astro.url.pathname;
+const icons = [
+  { label: 'home', glyph: '~', href: '/', bg: '#F2B544', current: path === '/' },
+  { label: 'blog', glyph: '¶', href: '/posts/', bg: '#E8E2D0', current: path.startsWith('/posts/') },
+  { label: 'open-source', glyph: 'PR', href: '/open-source/', bg: '#8FB8D8', current: path.startsWith('/open-source/') },
+  { label: 'cv.pdf', glyph: 'cv', href: '/cv.pdf', bg: '#E8B4A0' },
+  { label: 'contact', glyph: '@', href: `mailto:${SITE.email}`, bg: '#C9D2DC' },
+];
+---
+<nav class="icons" aria-label="Desktop">
+  {icons.map((icon) => (
+    <a class="icon" href={icon.href} aria-current={icon.current ? 'page' : undefined}>
+      <span class="icon-glyph" aria-hidden="true" style={`background:${icon.bg}`}>{icon.glyph}</span>
+      <span class="icon-label">{icon.label}</span>
+    </a>
+  ))}
+  {prCount !== undefined && <div class="pr-chip">{prCount}<br /><span>PRs merged</span></div>}
+</nav>

@@ -1,0 +1,111 @@
+---
+import { existsSync } from 'node:fs';
+import Monogram from '../components/Monogram.astro';
+import PostCard from '../components/PostCard.astro';
+import Window from '../components/Window.astro';
+import Desktop from '../layouts/Desktop.astro';
+import { SITE } from '../lib/site';
+import { countPrs, getPosts, getProjects, getStats } from '../lib/stats';
+
+const posts = (await getPosts()).slice(0, 3);
+const projects = await getProjects();
+const { prs } = await getStats();
+const hasPortrait = existsSync('public/portrait.png');
+
+const description =
+  "Andres Salamanca, a C++ engineer. I contribute to LLVM and open source in general, and write about compilers and C++.";
+const person = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: SITE.name,
+  url: Astro.site,
+  sameAs: [SITE.github, SITE.linkedin],
+};
+---
+<Desktop
+  title={SITE.name}
+  description={description}
+  prCount={prs}
+  jsonLd={person}
+  tasks={[
+    { label: 'about.txt', window: 'about' },
+    { label: '~/posts', window: 'posts' },
+    { label: 'open-source', window: 'oss' },
+  ]}
+>
+  <h1 class="prompt">andres@salamanca:~$ <span>whoami</span></h1>
+
+  <div class="win-grid">
+    <div class="win-col">
+      <Window id="about" title="about.txt">
+        <div class="about">
+          <div class="about-text">
+            <p>Hi, I'm <strong>Andres Salamanca</strong>, a C++ engineer. I contribute to LLVM and open source in general, and write about compilers and C++.</p>
+            <p class="muted">This is my notebook: articles and my open-source pull requests.</p>
+            <div class="btn-row">
+              <a class="btn" href="/cv.pdf">cv.pdf -&gt;</a>
+              <a class="btn" href={SITE.github}>github -&gt;</a>
+              <a class="btn" href={SITE.linkedin}>linkedIn -&gt;</a>
+            </div>
+          </div>
+          {hasPortrait
+            ? <img class="portrait" src="/portrait.png" alt="Pixel-art portrait of Andres" width="120" height="120" />
+            : <Monogram />}
+        </div>
+      </Window>
+
+      <Window id="oss" title={`open-source — ${prs} merged`}>
+        <div class="pad">
+          <table class="area-table">
+            <thead><tr><th scope="col">project</th><th scope="col">PRs</th></tr></thead>
+            <tbody>
+              {projects.map((project) => (
+                <tr>
+                  <td><strong>{project.data.name}</strong><small>{project.data.description}</small></td>
+                  <td class="area-count">{countPrs(project)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <a class="btn" style="margin-top:14px" href="/open-source/">Open all {prs} PRs -&gt;</a>
+        </div>
+      </Window>
+    </div>
+
+    <div class="win-col">
+      <Window id="posts" title="~/posts — writing">
+        <div class="pad">
+          <ul class="card-list" style="margin-bottom:10px">
+            {posts.map((post) => <li><PostCard post={post} /></li>)}
+          </ul>
+          <a class="btn" href="/posts/">All posts -&gt;</a>
+        </div>
+      </Window>
+
+    </div>
+  </div>
+
+  <script is:inline type="module">
+    // Taskbar buttons minimize/restore their window. Without JS they are anchors.
+    document.querySelectorAll('[data-window]').forEach(function (task) {
+      var win = document.getElementById(task.dataset.window);
+      function sync() {
+        task.classList.toggle('pressed', win.open);
+        task.setAttribute('aria-expanded', String(win.open));
+      }
+      task.setAttribute('aria-controls', win.id);
+      task.addEventListener('click', function (event) {
+        event.preventDefault();
+        win.open = !win.open;
+        if (win.open) win.scrollIntoView({ block: 'nearest' });
+      });
+      win.addEventListener('toggle', sync);
+      sync();
+    });
+    // A link to /#window opens that window if it was minimized.
+    addEventListener('hashchange', function () {
+      var win = document.getElementById(location.hash.slice(1));
+      if (win && win.tagName === 'DETAILS') win.open = true;
+    });
+  </script>
+</Desktop>

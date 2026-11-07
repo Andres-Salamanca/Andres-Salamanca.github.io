@@ -1,0 +1,21 @@
+---
+import PostCard from '../../components/PostCard.astro';
+import Desktop from '../../layouts/Desktop.astro';
+import { SITE } from '../../lib/site';
+import { getPosts } from '../../lib/stats';
+
+const posts = await getPosts();
+---
+<Desktop title={`Posts | ${SITE.name}`} description={SITE.description} tasks={[{ label: '~/posts' }]}>
+  <section class="window" aria-labelledby="posts-title">
+    <div class="titlebar">
+      <h1 id="posts-title">~/posts — writing</h1>
+      <a class="title-btn" href="/" aria-label="Close and go home">x</a>
+    </div>
+    <div class="pad">
+      <ul class="card-list">
+        {posts.map((post) => <li><PostCard post={post} /></li>)}
+      </ul>
+    </div>
+  </section>
+</Desktop>

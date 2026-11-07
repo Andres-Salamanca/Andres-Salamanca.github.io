@@ -1,0 +1,13 @@
+---
+import Desktop from '../layouts/Desktop.astro';
+import { SITE } from '../lib/site';
+---
+<Desktop title={`Not found | ${SITE.name}`} description={SITE.description} tasks={[{ label: '404' }]}>
+  <section class="window" aria-labelledby="nf-title">
+    <div class="titlebar">
+      <h1 id="nf-title">404 — not found</h1>
+      <a class="title-btn" href="/" aria-label="Close and go home">x</a>
+    </div>
+    <div class="pad"><a class="btn" href="/">home -&gt;</a></div>
+  </section>
+</Desktop>
