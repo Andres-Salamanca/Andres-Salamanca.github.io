@@ -1,11 +1,11 @@
 ---
 title: "SimplifyCFG, part 1"
-Tags : ["LLVM" , "C++"] 
 date: 2025-02-05T16:07:05-05:00
-draft: false
-hideToc: false
+description: "A walk through the default transformations of one of LLVM’s busiest optimization passes."
+tags: ["LLVM", "C++"]
 ---
 
+import YouTube from "../../components/YouTube.astro";
 
 ## Introduction
 
@@ -18,7 +18,7 @@ A prominent example of a transformation pass is [SimplifyCFG][3]. This pass is a
 ### The SimplifyCFGPass class
 The [SimplifyCFG.h][4] file defines the following class:
 
-{{< highlight cpp "linenostart=29" >}}
+```cpp startLine=29 title="llvm/include/llvm/Transforms/Scalar/SimplifyCFG.h"
 class SimplifyCFGPass : public PassInfoMixin<SimplifyCFGPass> {
   SimplifyCFGOptions Options;
   public:
@@ -30,7 +30,7 @@ class SimplifyCFGPass : public PassInfoMixin<SimplifyCFGPass> {
  
       /// Run the pass over the function.
       PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
-{{< / highlight >}}
+```
 
 The `SimplifyCFGPass` class inherits from `PassInfoMixin<SimplifyCFGPass>`, which is designed for use with the [New Pass Manager][5]. Additionally, the class contains an attribute named `Options`, which allows us to specify the optimizations we want the pass to perform, in addition to the default ones.
 
@@ -46,7 +46,7 @@ In the code snippet, we can see that `AM` is used to call **TargetIRAnalysis** a
 - **AssumptionAnalysis**: This pass identifies and collects assumptions within the function `F`, enabling the pass to use these `assumptions`([llvm.assume’ Intrinsic][9]) to guide its transformations.  
 
 
-{{< highlight cpp "hl_lines=1-2 ,linenostart=374" >}}
+```cpp startLine=374 hl="1-2"
 PreservedAnalyses SimplifyCFGPass::run(Function &F,
                                        FunctionAnalysisManager &AM) {
   auto &TTI = AM.getResult<TargetIRAnalysis>(F);
@@ -62,22 +62,20 @@ PreservedAnalyses SimplifyCFGPass::run(Function &F,
     PA.preserve<DominatorTreeAnalysis>();
   return PA;
 }
-{{< / highlight >}}
+```
 
 The [dominator tree][1] (`DT`) is initialized as `nullptr`. As previously mentioned, this pass offers a variety of options, one of which is maintaining the dominator tree. This behavior can be controlled using the `simplifycfg-require-and-preserve-domtree` flag. By default, the `RequireAndPreserveDomTree` option returns `false` unless explicitly set to `true`. When this option is not enabled, the `DT` will not be initialized.
 
-{{< highlight cpp "hl_lines=2 ,linenostart=374" >}}
-
+```cpp startLine=374 hl="2"
   DominatorTree *DT = nullptr;
   if (RequireAndPreserveDomTree)
     DT = &AM.getResult<DominatorTreeAnalysis>(F);
 }
-{{< / highlight >}}
+```
 
 We can verify that the `DT` is not initialized using `gdb`.
 
-{{< highlight bash "hl_lines=17-18 ,linenostart=374" >}}
-
+```bash startLine=374 hl="17-18"
 379       if (RequireAndPreserveDomTree)
 (gdb) source commandLineOtionsPrettyPrinter.py ####load pretty printer i made :)####
 (gdb) p RequireAndPreserveDomTree
@@ -100,18 +98,17 @@ $2 = false
 381       if (!simplifyFunctionCFG(F, TTI, DT, Options))
 
 }
-{{< / highlight >}}
+```
 
 The `RequireAndPreserveDomTree` flag is implemented as a command-line option of type `bool`, allowing us to inspect its value directly in `gdb`. This can be done by invoking the **bool operator** or by observing that the code skips the associated `if` statement during debugging.
 
 Finally, we are ready to invoke the optimizations. The function `simplifyFunctionCFG(F, TTI, DT, Options)` is called to perform the optimizations. It returns a `bool` indicating whether any changes were made to the IR. If no changes were made, the pass will preserve all the analysis results.
 
-{{< highlight cpp "hl_lines=2 ,linenostart=374" >}}
-
+```cpp startLine=374 hl="2"
   if (!simplifyFunctionCFG(F, TTI, DT, Options))
     return PreservedAnalyses::all(); //Preserve analysis if no changes were made.
 }
-{{< / highlight >}}
+```
 
 
 Inside the `simplifyFunctionCFG` function, we can identify three primary calls for optimizations. These are the key functions that we will explain in detail:  
@@ -127,8 +124,7 @@ Inside the `simplifyFunctionCFG` function, we can identify three primary calls f
    - Deleting dead basic blocks.  
    - Sinking common code.  
 
-{{< highlight cpp "hl_lines=6-9 ,linenostart=374" >}}
-
+```cpp startLine=374 hl="6-9"
 static bool simplifyFunctionCFGImpl(Function &F, const TargetTransformInfo &TTI,
                                     DominatorTree *DT,
                                     const SimplifyCFGOptions &Options) {
@@ -140,7 +136,7 @@ static bool simplifyFunctionCFGImpl(Function &F, const TargetTransformInfo &TTI,
   EverChanged |= iterativelySimplifyCFG(F, TTI, DT ? &DTU : nullptr, Options);
  
 }
-{{< / highlight >}}
+```
 
 ## removeUnreachableBlocks function
 
@@ -151,24 +147,22 @@ This is the first function called by the pass. The parameters passed to the func
 3. `MSSAU` ([MemorySSAUpdater][13]): This parameter is initialized to its default value, `nullptr`.  
 
 
-{{< highlight cpp "hl_lines=1-2 4 " >}}
-
+```cpp hl="1-2 4"
 bool llvm::removeUnreachableBlocks(Function &F, domtreeupdater *DTU,
                                    MemorySSAUpdater *MSSAU) {
   SmallPtrSet<BasicBlock *, 16> Reachable;
   bool Changed = markAliveBlocks(F, Reachable, DTU);
  
 }
-{{< / highlight >}}
+```
 
-{{< highlight bash  >}}
-
+```bash
 279 bool EverChanged = removeUnreachableBlocks(F, DT ? &DTU : nullptr);
 (gdb) s
 llvm::removeUnreachableBlocks (F=..., DTU=0x0, MSSAU=0x0) 
 ## DTU and MSSAU are nullptr 
 }
-{{< / highlight >}}
+```
 
 
 The core of this pass lies in the markAliveBlocks function, which receives a [set][15] of [basic blocks][16] named `Reachable`. This function populates the `Reachable` set with the basic blocks that can be reached within the control flow graph.
@@ -195,15 +189,15 @@ Below are three examples demonstrating how the `markAliveBlocks` function operat
 
 1. **Example 1: Standard `markAliveBlocks` Execution**  
    - Shows how the function traverses the control flow graph and marks reachable blocks. 
-   {{< youtube vQPExywGko0 >}}
+   <YouTube id="vQPExywGko0" />
 
 2. **Example 2: Marking a Block as Unreachable Due to an Undefined Store**  
    - Demonstrates a case where a block is removed because it stores a value to an undefined memory address.
-   {{< youtube f0FJCRDipEo >}}
+   <YouTube id="f0FJCRDipEo" />
 
 3. **Example 3: Marking a Block as Unreachable Using `llvm.assume`**  
    - Illustrates how LLVM assumptions (`llvm.assume`) can result in a block being marked as unreachable when an assumption is known to be false.  
-   {{< youtube sDA2MHJBsfw >}}
+   <YouTube id="sDA2MHJBsfw" />
 
 
 
@@ -230,8 +224,7 @@ After iterating through the function:
 - If `BlocksToRemove` is **empty**, the function returns `Changed`.  
 - Otherwise, `Changed` is set to `true`, and `DeleteDeadBlocks` is called to eliminate the unreachable blocks.  
 
-{{< highlight cpp "hl_lines=4 10 15 18 21 23" >}}
-
+```cpp hl="4 10 15 18 21 23"
  bool Changed = markAliveBlocks(F, Reachable, DTU);
  
   // If there are unreachable blocks in the CFG...
@@ -258,7 +251,7 @@ After iterating through the function:
  
   return Changed; 
 }
-{{< / highlight >}}
+```
 
 ## Conclusion  
 

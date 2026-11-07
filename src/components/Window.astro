@@ -1,0 +1,14 @@
+---
+interface Props {
+  id: string;
+  title: string;
+}
+const { id, title } = Astro.props;
+---
+<details class="window" id={id} open>
+  <summary class="titlebar">
+    <h2>{title}</h2>
+    <span class="title-btn" aria-hidden="true"><span class="minimize">_</span><span class="restore">□</span></span>
+  </summary>
+  <slot />
+</details>

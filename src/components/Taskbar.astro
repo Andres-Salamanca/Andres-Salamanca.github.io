@@ -1,0 +1,25 @@
+---
+import { getStats } from '../lib/stats';
+
+export interface Task {
+  label: string;
+  /** id of a home window; omitted for the single window of a page. */
+  window?: string;
+}
+interface Props {
+  tasks: Task[];
+}
+const { tasks } = Astro.props;
+const { posts, prs } = await getStats();
+---
+<nav class="taskbar" aria-label="Taskbar">
+  <a class="task task-home" href="/"><span aria-hidden="true"></span>home</a>
+  {tasks.map((task) =>
+    task.window ? (
+      <a class="task pressed" href={`#${task.window}`} data-window={task.window}>{task.label}</a>
+    ) : (
+      <span class="task pressed">{task.label}</span>
+    ),
+  )}
+  <span class="task-status">{posts} posts · {prs} PRs</span>
+</nav>

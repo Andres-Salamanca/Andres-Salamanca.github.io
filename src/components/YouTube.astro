@@ -1,0 +1,29 @@
+---
+interface Props {
+  id: string;
+}
+const { id } = Astro.props;
+---
+<figure class="yt" style="margin-inline:0">
+  <a href={`https://www.youtube.com/watch?v=${id}`} data-yt={id} aria-label="Play video on YouTube">
+    <img src={`https://i.ytimg.com/vi/${id}/hqdefault.jpg`} alt="" width="480" height="360" loading="lazy" decoding="async" />
+    <span class="play" aria-hidden="true">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0B1016" stroke-width="2" stroke-linejoin="round"><path d="M8 5l11 7-11 7z"></path></svg>
+    </span>
+  </a>
+</figure>
+
+<script>
+  // Swap the thumbnail for the player on click. Without JS it stays a plain link.
+  document.querySelectorAll<HTMLAnchorElement>('a[data-yt]').forEach((link) => {
+    link.addEventListener('click', (event) => {
+      event.preventDefault();
+      const iframe = document.createElement('iframe');
+      iframe.src = `https://www.youtube-nocookie.com/embed/${link.dataset.yt}?autoplay=1`;
+      iframe.title = 'YouTube video';
+      iframe.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+      link.replaceWith(iframe);
+      iframe.focus();
+    });
+  });
+</script>

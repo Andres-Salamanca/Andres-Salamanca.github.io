@@ -1,0 +1,36 @@
+:root {
+  --desk: #18283a;
+  --desk-top: #1e3347;
+  --desk-low: #0f1a26;
+  --win: #eceef1;
+  --paper: #fbfbfc;
+  --ink: #0b1016;
+  --muted: #3e4955;
+  --title-1: #1f3a5f;
+  --title-2: #4a7391;
+  --bevel: #d7dbe0;
+  --bevel-light: #e9ecef;
+  --bevel-shade: #8a929c;
+  --card: #e3e6ea;
+  --taskbar: #c3c8ce;
+  --on-dark: #f4f6f8;
+  --on-dark-muted: #c9d2dc;
+  --amber: #f2b544;
+  --amber-ink: #8a5300;
+  --link: #1f4e8a;
+  --code-bg: #0e1621;
+  --code-fg: #d6e2ee;
+  --code-hl: #22344a;
+  --line-no: #8c99af;
+  --line-no-hl: #a5b1c4;
+
+  --bevel-out: inset -2px -2px 0 var(--bevel-shade), inset 2px 2px 0 #fff;
+  --bevel-in: inset 2px 2px 0 var(--bevel-shade);
+  --hard-shadow: 6px 6px 0 var(--ink);
+  --border: 2px solid var(--ink);
+
+  --font-pixel: 'VT323', monospace;
+  --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
+  --font-serif: 'IBM Plex Serif', Georgia, serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+}

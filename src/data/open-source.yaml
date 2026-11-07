@@ -1,0 +1,123 @@
+# Merged pull requests in open-source projects, by project and area.
+# Single source of truth for the /open-source/ page and every PR count on the site.
+# Add new PRs at the top of the matching group; add a project as a new entry under `projects`.
+# PR URL = https://github.com/<repo>/pull/<number>
+
+projects:
+  - id: llvm
+    name: llvm-project
+    repo: llvm/llvm-project
+    description: >-
+      Upstreaming ClangIR (CIR), Clang's MLIR-based IR, through public code
+      review since March 2025.
+    query: https://github.com/llvm/llvm-project/pulls?q=is%3Apr+author%3AAndres-Salamanca+is%3Amerged
+    groups:
+      - id: coroutines
+        title: C++20 coroutines
+        summary: >-
+          End-to-end coroutine support in ClangIR: emitting the coroutine body and
+          promise, cir.await with ready/suspend/resume branches, co_yield and
+          co_return, structured control flow for suspend points, FlattenCFG for
+          coroutine ops, and dedicated cir.coro.* intrinsic ops with LLVM lowering.
+        prs:
+          - { number: 236293, title: "Pass the promise address to cir.coro.intrinsic.id" }
+          - { number: 234817, title: "Replace coroutine unit attrs on FuncOp with a CoroutineKind enum attr" }
+          - { number: 229947, title: "Add round trip tests for coroutine intrinsics", nfc: true }
+          - { number: 228310, title: "Add cir.coro.suspend intrinsic" }
+          - { number: 222210, title: "Add cir.coro.intrinsic.resume/destroy/done Ops" }
+          - { number: 221343, title: "Use declarative llvmOp lowering for coroutine intrinsics", nfc: true }
+          - { number: 221124, title: "Add cir.coro.intrinsic.promise Op" }
+          - { number: 220466, title: "Add support for coroutine allocation failure" }
+          - { number: 215709, title: "Add lowering for coroutine intrinsics and token none" }
+          - { number: 214125, title: "Add token.none and fix coro.end signature" }
+          - { number: 213191, title: "Add structured control flow for coroutine suspend points" }
+          - { number: 211699, title: "Change previous coroutine builtins to have their own coro intrinsic ops" }
+          - { number: 211152, title: "Reorganize coroutine tests", nfc: true }
+          - { number: 211143, title: "Remove unused LLVM lowering for cir.await", nfc: true }
+          - { number: 203802, title: "Implement FlattenCFG for coroutine AwaitOp, CoroBodyOp, and CoReturnOp" }
+          - { number: 189281, title: "Add coroutine cleanup handling and update co_return semantics" }
+          - { number: 178821, title: "Add OGCG tests for coroutines", nfc: true }
+          - { number: 176598, title: "Upstream coroutine builtin coro_end" }
+          - { number: 173174, title: "Upstream support co_return of values from co_await" }
+          - { number: 173162, title: "Upstream support for coroutine co_yield expression" }
+          - { number: 171755, title: "Partially upstream coroutine co_return support" }
+          - { number: 169864, title: "Upstream Emit the resume branch for cir.await op" }
+          - { number: 168814, title: "Emit ready and suspend branches for cir.await" }
+          - { number: 168133, title: "Upstream CIR await op" }
+          - { number: 166683, title: "Emit promise declaration in coroutine" }
+          - { number: 164180, title: "Emit CIR builtins: coroAlloc, coroBegin, and coroSize" }
+          - { number: 161616, title: "Initial support for emitting coroutine body" }
+
+      - id: control-flow
+        title: Control flow
+        summary: >-
+          if and switch statements (all case kinds, FlattenCFG with SwitchFlatOp,
+          case simplification, lowering to LLVM), goto and labels with the
+          GotoSolver pass, and GNU labels-as-values / indirect goto.
+        prs:
+          - { number: 178106, title: "Add lowering for BlockAddressOp, IndirectBrOp and LabelOp" }
+          - { number: 169967, title: "Upstream support for cir.indirectbr" }
+          - { number: 168151, title: "Upstream the initial BlockAddressOp implementation" }
+          - { number: 163280, title: "Fix error in cir.label when using cir.br in entry block" }
+          - { number: 154596, title: "Upstream GotoSolver pass" }
+          - { number: 153701, title: "Upstream GotoOp" }
+          - { number: 152802, title: "Upstream LabelOp" }
+          - { number: 140649, title: "Implement switch case simplify" }
+          - { number: 140457, title: "Remove the empty verifier in cir.ifOp" }
+          - { number: 140425, title: "Upstream support for lowering cir.switch to LLVM" }
+          - { number: 139154, title: "Upstream support for FlattenCFG switch and SwitchFlatOp" }
+          - { number: 138003, title: "Upstream support for switch statements case kinds" }
+          - { number: 137106, title: "Upstream initial support for switch statements" }
+          - { number: 134333, title: "Add if statement support" }
+
+      - id: bitfields
+        title: C/C++ bit-fields
+        summary: >-
+          Bit-field record layout and access: get_bitfield / set_bitfield ops,
+          unary and binary operations, volatile bit-fields, unions, big-endian
+          offsets, AAPCS, and -ffine-grained-bitfield-accesses.
+        prs:
+          - { number: 156085, title: "Add support for discrete bit-field" }
+          - { number: 154398, title: "Fix access to bitfields inside a union" }
+          - { number: 151875, title: "Implemented get/set for volatile bitfields" }
+          - { number: 151741, title: "Fix outdated bitfield iteration logic in accumulateFields" }
+          - { number: 151252, title: "Add ComputeVolatileBitfields Implementation" }
+          - { number: 150687, title: "Add support for -ffine-grained-bitfield-accesses" }
+          - { number: 149676, title: "Add support for binary operations on bitfield members" }
+          - { number: 148999, title: "Fix alignment when lowering set/get bitfield operations" }
+          - { number: 148083, title: "Add support for unary operations on bitfield members" }
+          - { number: 147828, title: "Add example for get_bitfield with volatile qualifier", nfc: true }
+          - { number: 147628, title: "Add test for parsing bitfield_info attribute" }
+          - { number: 147609, title: "Upstream new SetBitfieldOp for handling C and C++ struct bitfields" }
+          - { number: 145971, title: "Upstream get_bitfield operation to load bit-field members from structs" }
+          - { number: 145560, title: "Fix NYI AAPCS bit-fields by skipping unsupported case" }
+          - { number: 145414, title: "Upstream computeVolatileBitfields", nfc: true }
+          - { number: 145096, title: "Add support for bitfields in unions" }
+          - { number: 145067, title: "Add bitfield offset calculation for big-endian targets" }
+          - { number: 145058, title: "Add support for DumpRecordLayouts" }
+          - { number: 142041, title: "Add initial support for bitfields in structs" }
+
+      - id: infrastructure
+        title: Dialect & infrastructure
+        summary: >-
+          Op assembly formats, TableGen-driven lowering, data layout support and
+          build/test infrastructure.
+        prs:
+          - { number: 198962, title: "Add custom assembly format for alloca op to fix flag parsing" }
+          - { number: 176664, title: "Add custom constructor declaration to CIR lowering TableGen" }
+          - { number: 165060, title: "Update TypeCache file to use MLIR-style camel case", nfc: true }
+          - { number: 146608, title: "Add mlir-translate to CMake" }
+          - { number: 142241, title: "Add DLTI dialect support to module attributes" }
+          - { number: 142218, title: "Update CHECK pattern to use regex for new def of RV", nfc: true }
+
+  - id: beman
+    name: beman/execution
+    repo: bemanproject/execution
+    description: C++26 std::execution (P2300).
+    query: https://github.com/bemanproject/execution/pulls?q=is%3Apr+author%3AAndres-Salamanca+is%3Amerged
+    groups:
+      - id: bulk
+        title: execution::bulk
+        prs:
+          - { number: 173, title: "Make bulk pipeable" }
+          - { number: 129, title: "Add Bulk Algorithm" }
