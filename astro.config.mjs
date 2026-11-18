@@ -7,7 +7,7 @@ import { workstation } from './src/lib/workstation-theme.mjs';
 
 export default defineConfig({
   // For a custom domain, change `site` and add public/CNAME.
-  site: 'https://andres-salamanca.github.io',
+  site: 'https://andressalamanca.dev',
   output: 'static',
   trailingSlash: 'always',
   build: { format: 'directory' },

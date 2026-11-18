@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://andres-salamanca.github.io/sitemap.xml

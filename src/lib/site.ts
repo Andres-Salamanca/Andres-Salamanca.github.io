@@ -1,7 +1,7 @@
 export const SITE = {
   name: 'Andres Salamanca',
   description: 'A space where I share my experiments and learnings in systems programming.',
-  email: 'kiandrewsala@gmail.com',
+  email: 'contact@andressalamanca.dev',
   github: 'https://github.com/Andres-Salamanca',
   linkedin: 'https://www.linkedin.com/in/salamanca-andres/',
 };
